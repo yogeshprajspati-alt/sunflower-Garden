@@ -18,7 +18,11 @@ export const metadata: Metadata = {
   title: "Princess Prachii — The Sunflower Garden",
   description:
     "A golden sanctuary dedicated to Princess Prachii. Gentle, fearless, and unstoppable. Scroll to explore her journey.",
-  metadataBase: new URL("http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000"
+  ),
 };
 
 export default function RootLayout({
