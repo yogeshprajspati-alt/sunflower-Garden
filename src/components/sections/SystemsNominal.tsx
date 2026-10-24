@@ -145,7 +145,7 @@ export function SystemsNominal() {
 
                 {/* Exam & Khush Raho Blessing */}
                 <p className="font-serif italic text-amber-200 text-lg sm:text-xl pt-2">
-                  Khushhhhhhhhhhhhhhhhh raho hamesha! Ab bohot acche se padhai karo, sab accha hota h jab aapka mann khush hota h. <span className="font-sans not-italic font-semibold text-amber-300 underline decoration-amber-400/50 underline-offset-4">Bhaad me jaaye sab, bas khush raho tum.</span> 🌻✨
+                  Khushhhhhhhhhhhhhhhhh raho hamesha! Ab bohot acche se padhai karo, sab accha hota h jab aapka mann khush hota h. Umeed to hai sunflower jaisi prachi ko ye sunflower wali tareef pasand aayegi..!! kyun haina!!<span className="font-sans not-italic font-semibold text-amber-300 underline decoration-amber-400/50 underline-offset-4">Bhaad me jaaye sab, bas khush raho tum.</span> 🌻✨
                 </p>
               </div>
 
