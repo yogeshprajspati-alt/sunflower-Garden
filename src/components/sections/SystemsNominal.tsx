@@ -122,6 +122,8 @@ export function SystemsNominal() {
                 {/* Besties & Patchup Heartfelt Proposal */}
                 <p className="border-l-2 border-amber-400/50 pl-4 py-2 text-amber-100/90 italic font-serif leading-relaxed bg-amber-400/5 rounded-r-xl text-[14px] md:text-[15px]">
                   &ldquo;Prachi wo saari misunderstandings ki wajah se hua tha... conversation gap ke chalte. If it doesn&apos;t hurt/suffocate you... can we forget the breakup and patchup like besties we were before? Future ko future pe chhordo, present moments enjoy karo. Agar tumko dikkat na ho to can we restore... but if it feels harsh harsh to rehne dooo 👉👈. Ye bas tumhara mood accha karne ke liye banaya tha, pressure nhi lena...&rdquo; Mujhe bs samajh hi nhi aa rha ki me kya karu... mn to kar rha h mana lu.... , lekin fir khyl aa rha ki kyaa ho wo manane se aur pareshaan ho jaayee. Yahi War Chal rhi h tabse. IDK Bohot confused huuu... manana bhi hai aur pareshan bhi nhi karna.... Kaash koi  rasta dikh jata yrrrr... 
+
+                  pata h me kcuh accha karne ka socta hu har baar or koi na koi kaand ho jata h mujh se 😩 or dar bhi laga rehta h ki tumko kuch bura naa lag jaaye to dar dar ke sab karta hu, plan karke... Lekin fir bhi sab kharab ho jata h pta nhi kaiseeee....
                 </p>
 
                 {/* Blame Protection Promise */}
