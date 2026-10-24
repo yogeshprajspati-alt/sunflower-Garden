@@ -124,6 +124,8 @@ export function SystemsNominal() {
                   &ldquo;Prachi wo saari misunderstandings ki wajah se hua tha... conversation gap ke chalte. If it doesn&apos;t hurt/suffocate you... can we forget the breakup and patchup like besties we were before? Future ko future pe chhordo, present moments enjoy karo. Agar tumko dikkat na ho to can we restore... but if it feels harsh harsh to rehne dooo 👉👈. Ye bas tumhara mood accha karne ke liye banaya tha, pressure nhi lena...&rdquo; Mujhe bs samajh hi nhi aa rha ki me kya karu... mn to kar rha h mana lu.... , lekin fir khyl aa rha ki kyaa ho wo manane se aur pareshaan ho jaayee. Yahi War Chal rhi h tabse. IDK Bohot confused huuu... manana bhi hai aur pareshan bhi nhi karna.... Kaash koi  rasta dikh jata yrrrr... 
 
                   pata h me kcuh accha karne ka socta hu har baar or koi na koi kaand ho jata h mujh se 😩 or dar bhi laga rehta h ki tumko kuch bura naa lag jaaye to dar dar ke sab karta hu, plan karke... Lekin fir bhi sab kharab ho jata h pta nhi kaiseeee....
+
+                  Ab to mujhe pata chal gaya h ki tumko pasand to hainnn ye diariyaan mairiyaaannn... isiliye jab mera mn hoga to me mere midnight thoughts jo obviously sweet honge wo sab tumhare liye likhunga... aur tumhe pta h ki me kabhi bhi tumhare liye kuch bhi karne se nhi katraata... wahi continue rakhunga.. new new tareefen.. Taaki jab tum free raho to ye tumhare mood ko accha kar de... aur tumhare chehre pe wo wide smile aa jaaye✨ Joker ki tarah 🫣 Yr prachi mujhe kuch nhi chaiye tumse.. bs meri pasandeeda ladki ko happy happy rakha karo bs.. 
                 </p>
 
                 {/* Blame Protection Promise */}
