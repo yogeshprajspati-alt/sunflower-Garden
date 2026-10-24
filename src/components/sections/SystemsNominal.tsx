@@ -125,12 +125,12 @@ export function SystemsNominal() {
 
                   pata h me kcuh accha karne ka socta hu har baar or koi na koi kaand ho jata h mujh se 😩 or dar bhi laga rehta h ki tumko kuch bura naa lag jaaye to dar dar ke sab karta hu, plan karke... Lekin fir bhi sab kharab ho jata h pta nhi kaiseeee....
 
-                  Ab to mujhe pata chal gaya h ki tumko pasand to hainnn ye diariyaan mairiyaaannn... isiliye jab mera mn hoga to me mere midnight thoughts jo obviously sweet honge wo sab tumhare liye likhunga... aur tumhe pta h ki me kabhi bhi tumhare liye kuch bhi karne se nhi katraata... wahi continue rakhunga.. new new tareefen.. Taaki jab tum free raho to ye tumhare mood ko accha kar de... aur tumhare chehre pe wo wide smile aa jaaye✨ Joker ki tarah 🫣 Yr prachi mujhe kuch nhi chaiye tumse.. bs meri pasandeeda ladki ko happy happy rakha karo bs.. 
+                  Ab to mujhe pata chal gaya h ki tumko pasand to hainnn ye diariyaan mairiyaaannn... isiliye jab mera mn hoga to me mere midnight thoughts jo obviously sweet honge wo sab tumhare liye likhunga... aur tumhe pta h ki me kabhi bhi tumhare liye kuch bhi karne se nhi katraata... wahi continue rakhunga.. new new tareefen.. Taaki jab tum free raho to ye tumhare mood ko accha kar de... aur tumhare chehre pe wo wide smile aa jaaye✨ Joker ki tarah 🫣 kyuki I know now ki tum padhogi hiiii... maybe sone se pahle ya dopahar me padhai se break ke baad.. Ya fir kabhi low feel karte time. Yr prachi mujhe kuch nhi chaiye tumse.. bs meri pasandeeda ladki ko happy happy rakha karo bs.. 
                 </p>
 
                 {/* Blame Protection Promise */}
                 <p className="text-zinc-200 leading-relaxed">
-                  Aur tum kuch bhi karo, kuch bhi kaho me kabhi bhi tumpe blame nhi aane dunga 👉👈 mt dara karo us cheez se... aur <span className="font-serif italic text-amber-300 font-medium">Prachi kabhi galti nhi karti, wo to perfect h guys 👉👈❤️</span>
+                  Aur tum kuch bhi karo, kuch bhi kaho me kabhi bhi tumpe blame nhi aane dunga 👉👈 mt dara karo us cheez se... aur <span className="font-serif italic text-amber-300 font-medium">Prachi kabhi galti nhi karti, wo to perfect h guys 👉👈❤️ Or kuch gadbad ho jaaye to me hu naa.. </span>
                 </p>
 
                 {/* Thin lips wide smile & communication note */}
