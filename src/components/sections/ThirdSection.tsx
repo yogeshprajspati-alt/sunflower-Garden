@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { EyebrowBadge } from "@/components/ui/EyebrowBadge";
-import { HudFrame } from "@/components/ui/HudFrame";
 import { THIRD_BEATS, THIRD_FRAME_COUNT, thirdFramePath } from "@/lib/third";
+import { Sparkle, ArrowDown } from "@phosphor-icons/react";
+import { Prachi100Modal } from "@/components/ui/Prachi100Modal";
 
 export function ThirdSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -22,6 +22,77 @@ export function ThirdSection() {
   const [loadProgress, setLoadProgress] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [visibleBeats, setVisibleBeats] = useState<Set<string>>(new Set());
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const drawFrame = useCallback((index: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const imgs = framesRef.current;
+    if (!imgs || imgs.length === 0) return;
+
+    // Find requested frame or the closest loaded frame so the screen NEVER freezes or blanks
+    let img = imgs[index];
+    if (!img || !img.complete || !img.naturalWidth) {
+      for (let offset = 1; offset < imgs.length; offset++) {
+        const prev = imgs[index - offset];
+        if (prev && prev.complete && prev.naturalWidth) {
+          img = prev;
+          break;
+        }
+        const next = imgs[index + offset];
+        if (next && next.complete && next.naturalWidth) {
+          img = next;
+          break;
+        }
+      }
+    }
+    if (!img || !img.complete || !img.naturalWidth) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const cw = canvas.width;
+    const ch = canvas.height;
+    const imgRatio = img.naturalWidth / img.naturalHeight;
+    const canvasRatio = cw / ch;
+
+    let drawW: number;
+    let drawH: number;
+
+    // "contain" sizing: ensure 100% of the image is shown without ANY cropping
+    if (canvasRatio > imgRatio) {
+      drawH = ch;
+      drawW = ch * imgRatio;
+    } else {
+      drawW = cw;
+      drawH = cw / imgRatio;
+    }
+
+    const drawX = (cw - drawW) / 2;
+    const drawY = (ch - drawH) / 2;
+
+    ctx.clearRect(0, 0, cw, ch);
+
+    // If screen is wider, softly draw ambient cover in the background for atmosphere
+    if (canvasRatio > imgRatio) {
+      const coverW = cw;
+      const coverH = cw / imgRatio;
+      const coverX = 0;
+      const coverY = (ch - coverH) / 2;
+      ctx.save();
+      ctx.globalAlpha = 0.15;
+      ctx.drawImage(img, coverX, coverY, coverW, coverH);
+      ctx.restore();
+    }
+
+    // Draw the FULL, completely uncropped foreground image with subtle ambient shadow
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
+    ctx.shadowBlur = 30;
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+    ctx.restore();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,16 +106,27 @@ export function ThirdSection() {
         if (cancelled) return;
         loadedCount++;
         setLoadProgress(loadedCount / THIRD_FRAME_COUNT);
+        if (loadedCount === 1) {
+          drawFrame(0);
+          setLoaded(true);
+        }
+        if (loadedCount >= 10) {
+          loadedRef.current = true;
+          setLoaded(true);
+        }
         if (loadedCount === THIRD_FRAME_COUNT) {
           loadedRef.current = true;
           setLoaded(true);
+        }
+        if (Math.abs(lastFrameRef.current - (i - 1)) <= 2) {
+          drawFrame(lastFrameRef.current);
         }
       };
       img.onerror = () => {
         if (cancelled) return;
         loadedCount++;
         setLoadProgress(loadedCount / THIRD_FRAME_COUNT);
-        if (loadedCount === THIRD_FRAME_COUNT) {
+        if (loadedCount >= 10) {
           loadedRef.current = true;
           setLoaded(true);
         }
@@ -56,41 +138,7 @@ export function ThirdSection() {
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  const drawFrame = useCallback((index: number) => {
-    const canvas = canvasRef.current;
-    const img = framesRef.current[index];
-    if (!canvas || !img || !img.complete || !img.naturalWidth) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const cw = canvas.width;
-    const ch = canvas.height;
-    const imgRatio = img.naturalWidth / img.naturalHeight;
-    const canvasRatio = cw / ch;
-
-    let drawW: number;
-    let drawH: number;
-    if (canvasRatio > imgRatio) {
-      drawW = cw;
-      drawH = cw / imgRatio;
-    } else {
-      drawH = ch;
-      drawW = ch * imgRatio;
-    }
-
-    if (window.innerWidth <= 768) {
-      drawW *= 1.3;
-      drawH *= 1.3;
-    }
-
-    const drawX = (cw - drawW) / 2;
-    const drawY = (ch - drawH) / 2;
-
-    ctx.clearRect(0, 0, cw, ch);
-    ctx.drawImage(img, drawX, drawY, drawW, drawH);
-  }, []);
+  }, [drawFrame]);
 
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -123,7 +171,7 @@ export function ThirdSection() {
       requestAnimationFrame(() => {
         tickingRef.current = false;
         const section = sectionRef.current;
-        if (!section || !loadedRef.current) return;
+        if (!section) return;
 
         const rect = section.getBoundingClientRect();
         const scrollable = section.offsetHeight - window.innerHeight;
@@ -132,9 +180,12 @@ export function ThirdSection() {
             ? 0
             : Math.min(1, Math.max(0, -rect.top / scrollable));
 
+        // Complete all 200 frames across 0% to 75% of scroll travel.
+        // The remaining 25% holds the completed 200th frame firmly pinned so it NEVER moves up prematurely!
+        const frameProgress = Math.min(1, Math.max(0, progress / 0.75));
         const frameIndex = Math.min(
           THIRD_FRAME_COUNT - 1,
-          Math.floor(progress * THIRD_FRAME_COUNT),
+          Math.floor(frameProgress * THIRD_FRAME_COUNT),
         );
         if (frameIndex !== lastFrameRef.current) {
           lastFrameRef.current = frameIndex;
@@ -160,7 +211,7 @@ export function ThirdSection() {
         if (seqReadoutRef.current) {
           const n = Math.min(THIRD_FRAME_COUNT, frameIndex + 1);
           seqReadoutRef.current.textContent =
-            `SEQ ${String(n).padStart(3, "0")} / ${THIRD_FRAME_COUNT}`;
+            `BLOOM ${String(n).padStart(3, "0")} / ${THIRD_FRAME_COUNT}`;
         }
 
         const newVisible = new Set<string>();
@@ -183,12 +234,12 @@ export function ThirdSection() {
   return (
     <section
       ref={sectionRef}
-      id="evolution"
-      className="scroll-animation relative border-t border-white/5 bg-background"
+      id="bloom"
+      className="scroll-animation relative border-t border-amber-400/10 bg-background"
     >
       <div
-        className="sticky top-0 min-h-[100dvh] w-full overflow-hidden bg-background"
-        style={{ height: "100dvh", willChange: "transform", transform: "translateZ(0)" }}
+        className="sticky top-0 h-screen h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-background"
+        style={{ willChange: "transform", transform: "translateZ(0)" }}
       >
         <canvas
           ref={canvasRef}
@@ -196,161 +247,207 @@ export function ThirdSection() {
           style={{ willChange: "contents", transform: "translateZ(0)" }}
         />
 
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(120% 80% at 50% 10%, transparent 30%, rgba(10,10,11,0.45) 70%, rgba(10,10,11,0.85) 100%)",
-          }}
-        />
+        {/* Minimal edge fades to keep navbar and bottom progress clear without darkening the image */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#080706]/75 to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#080706]/75 to-transparent z-10" />
 
-        <div className="pointer-events-none absolute left-6 top-28 z-10 flex max-w-[46ch] flex-col items-start gap-5 md:left-12 md:top-32">
-          <span className="font-serif italic text-accent tracking-wide text-sm md:text-base">Infinite Evolution</span>
-          <h2
-            ref={h2TitleRef}
-            className="font-serif text-4xl font-semibold leading-[0.98] tracking-tight text-foreground md:text-6xl lg:text-7xl"
-            style={{ opacity: 0, transition: "opacity 240ms ease-out" }}
-          >
-            The Ultimate
-            <br />
-            <span className="text-accent">Transformation.</span>
-          </h2>
-          <p className="max-w-[42ch] font-sans text-sm leading-relaxed text-zinc-400 md:text-base">
-            Journeying toward excellence. Prachii has transcended all limits — where grace meets power.
-          </p>
-        </div>
-
-        <div className="pointer-events-none absolute left-6 top-20 z-10 flex items-center gap-2 md:left-10 md:top-24">
-          <div className="h-px w-8 bg-accent/40" />
-          <span className="font-sans text-[10px] uppercase tracking-[0.32em] text-zinc-500">
-            Evolution Log &mdash; Radiant
+        {/* Top Badges */}
+        <div className="pointer-events-none absolute left-6 top-20 z-10 flex items-center gap-3 md:left-12 md:top-24">
+          <span className="flex h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.9)]" />
+          <span className="font-sans text-[11px] uppercase tracking-[0.32em] text-amber-200/70">
+            Chapter III &mdash; Petals & Character
           </span>
         </div>
 
-        <div className="pointer-events-none absolute right-6 top-20 z-10 flex items-center gap-3 md:right-10 md:top-24">
+        <div className="pointer-events-none absolute right-6 top-20 z-10 flex items-center gap-3 md:right-12 md:top-24">
           <span
             ref={seqReadoutRef}
-            className="font-sans text-[10px] uppercase tracking-[0.28em] text-accent font-medium"
+            className="font-sans text-[11px] uppercase tracking-[0.22em] text-amber-300 font-medium"
           >
-            SEQ 001 / {THIRD_FRAME_COUNT}
+            BLOOM 001 / {THIRD_FRAME_COUNT}
           </span>
-          <span
-            aria-hidden
-            className="inline-block h-1.5 w-1.5 rounded-full bg-accent/80"
-          />
+          <Sparkle size={13} weight="fill" className="text-amber-400 animate-pulse" />
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10">
-          <div className="mx-6 mb-3 h-px bg-white/5 md:mx-10">
-            <div
-              ref={progressFillRef}
-              className="h-full origin-left bg-accent/60"
-              style={{ transform: "scaleX(0)", transition: "transform 80ms linear" }}
-            />
-          </div>
-          <div className="mx-6 flex items-center justify-between pb-4 font-sans text-[10px] uppercase tracking-[0.28em] text-zinc-500 md:mx-10">
-            <span>PRACHIII // GROWTH</span>
-            <span>U.P.G.R.A.D.E // SUCCESS</span>
-            <span>Scroll &darr;</span>
-          </div>
+        {/* Left Headline Typography */}
+        <div className="pointer-events-none absolute left-6 top-28 z-10 flex max-w-[420px] flex-col items-start gap-3 md:left-12 xl:left-16 md:top-32">
+          <span className="font-sans text-[11px] uppercase tracking-[0.25em] text-amber-300/80">
+            Observation &bull; 03 &bull; 100 Things
+          </span>
+          <h2
+            ref={h2TitleRef}
+            className="font-serif text-3xl font-semibold leading-[0.98] tracking-tight text-foreground md:text-5xl lg:text-6xl"
+            style={{ opacity: 0, transition: "opacity 240ms ease-out, transform 240ms ease-out" }}
+          >
+            100 Things &
+            <br />
+            <span className="gold-gradient-text italic font-normal">All Prachi.</span>
+          </h2>
+          <p className="font-sans text-xs leading-relaxed text-zinc-400 md:text-sm">
+            Princess bhi, nautanki bhi, nakchadi bhi aur pyaari toh itni ki kya hi batau 🎀🫶🏻
+          </p>
+
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="pointer-events-auto mt-1.5 inline-flex items-center gap-2 rounded-full border border-amber-400/35 bg-amber-400/15 px-4 py-2 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-md transition-all duration-300 hover:border-amber-300 hover:bg-amber-400/25 hover:shadow-[0_0_20px_rgba(251,191,36,0.35)] active:scale-95"
+          >
+            <Sparkle size={13} weight="fill" className="text-amber-400 animate-pulse" />
+            <span>Open All 100 Reasons 😭🎀</span>
+          </button>
         </div>
 
+        {/* Desktop Beat Cards (right side) */}
         {THIRD_BEATS.map((b, i) => {
           const visible = visibleBeats.has(b.id);
           const position =
             i === 0
-              ? "top-[24%] right-6 md:right-12"
+              ? "top-[20%] right-6 lg:right-12 xl:right-16"
               : i === 1
-              ? "top-1/2 -translate-y-1/2 right-6 md:right-12"
-              : "bottom-24 right-6 md:bottom-28 md:right-12";
+              ? "top-1/2 -translate-y-1/2 right-6 lg:right-12 xl:right-16"
+              : i === 2
+              ? "top-[48%] -translate-y-1/2 right-6 lg:right-12 xl:right-16"
+              : "bottom-24 right-6 lg:right-12 xl:right-16";
           return (
             <div
               key={b.id}
-              className={`pointer-events-none absolute ${position} z-20 hidden w-[420px] max-w-[90vw] md:block text-right`}
+              className={`pointer-events-none absolute ${position} z-20 hidden w-[380px] xl:w-[420px] max-w-[32vw] md:block`}
             >
               <figure
-                className={`card-surface pointer-events-auto p-8 transition-all duration-700 ease-out ${
-                  visible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+                className={`card-surface pointer-events-auto p-6 xl:p-8 rounded-3xl border border-amber-300/20 bg-[#0c0a07]/80 backdrop-blur-2xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.85),0_0_30px_-5px_rgba(251,191,36,0.12)] ${
+                  visible ? "translate-y-0 opacity-100 scale-100" : "translate-y-8 opacity-0 scale-95"
                 }`}
-                style={{ borderRadius: "24px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(234, 188, 203, 0.1)" }}
               >
-                <span className="font-serif italic text-sm tracking-wide text-accent">
-                  {b.label}
-                </span>
-                <blockquote className="mt-4 font-serif text-2xl font-medium leading-snug tracking-tight text-foreground italic">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-sans text-[10px] xl:text-[11px] font-medium uppercase tracking-[0.22em] text-amber-300">
+                    {b.badge}
+                  </span>
+                  <div className="h-1.5 w-1.5 rounded-full bg-amber-400/80 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+                </div>
+                <blockquote className="font-serif text-lg xl:text-[20px] font-normal leading-[1.65] tracking-wide text-amber-50/95 italic">
                   &ldquo;{b.quote}&rdquo;
                 </blockquote>
-                <figcaption className="mt-6 flex items-center justify-between">
-                  <span className="font-sans text-sm text-zinc-400">{b.speaker}</span>
-                  <span className="font-serif italic text-xs text-accent">
-                    {b.film}
+                <p className="font-sans text-[12px] xl:text-[13px] leading-relaxed text-zinc-400 pt-2.5">
+                  {b.subnote}
+                </p>
+                <div className="h-px bg-white/10 mt-3.5 mb-3" />
+                <figcaption className="flex items-center justify-between">
+                  <span className="font-sans text-[11px] tracking-wider uppercase text-amber-300/80 font-medium">
+                    {b.speaker}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(true)}
+                    className="inline-flex items-center gap-1 font-sans text-[10px] uppercase tracking-[0.18em] text-amber-300/90 hover:text-amber-100 transition-colors"
+                  >
+                    <span>Read 100</span>
+                    <Sparkle size={10} weight="fill" />
+                  </button>
                 </figcaption>
               </figure>
             </div>
           );
         })}
 
-        <div className="pointer-events-none absolute inset-x-0 top-[36%] z-20 flex flex-col gap-4 px-6 md:hidden">
+        {/* Mobile Beat Cards (bottom position) */}
+        <div className="pointer-events-none absolute inset-x-4 bottom-20 z-20 flex flex-col gap-3 md:hidden">
           {THIRD_BEATS.map((b) => {
             const visible = visibleBeats.has(b.id);
+            if (!visible) return null;
             return (
               <figure
                 key={b.id}
-                className={`card-surface pointer-events-auto p-6 transition-all duration-700 ease-out ${
-                  visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-                }`}
-                style={{ borderRadius: "20px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(234, 188, 203, 0.1)" }}
+                className="card-surface pointer-events-auto p-5 rounded-2xl border border-amber-300/20 bg-[#0c0a07]/90 backdrop-blur-2xl transition-all duration-500 ease-out translate-y-0 opacity-100 scale-100 shadow-2xl"
               >
-                <span className="font-serif italic text-xs tracking-wide text-accent">
-                  {b.label}
-                </span>
-                <blockquote className="mt-3 font-serif text-lg font-medium leading-snug text-foreground italic">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-sans font-medium uppercase tracking-wider text-amber-300">
+                    {b.badge}
+                  </span>
+                  <div className="h-1.5 w-1.5 rounded-full bg-amber-400/80" />
+                </div>
+                <blockquote className="font-serif text-[15px] font-normal leading-relaxed text-amber-50/95 italic">
                   &ldquo;{b.quote}&rdquo;
                 </blockquote>
-                <figcaption className="mt-4 flex items-center justify-between">
-                  <span className="font-sans text-xs text-zinc-300">{b.speaker}</span>
-                  <span className="font-serif italic text-[10px] text-accent">
-                    {b.film}
+                <p className="font-sans text-[11px] text-zinc-400 pt-1.5">
+                  {b.subnote}
+                </p>
+                <div className="h-px bg-white/10 mt-2.5 mb-2" />
+                <figcaption className="flex items-center justify-between">
+                  <span className="font-sans text-[10px] uppercase tracking-wider text-amber-300/80">
+                    {b.speaker}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(true)}
+                    className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-amber-300 underline underline-offset-2"
+                  >
+                    <span>Open 100 List</span>
+                    <Sparkle size={10} weight="fill" />
+                  </button>
                 </figcaption>
               </figure>
             );
           })}
         </div>
 
+        {/* Outro Transition Pill */}
         <div
           ref={outroRef}
-          className="pointer-events-none absolute bottom-24 left-6 z-10 flex flex-col items-start gap-5 md:bottom-32 md:left-12"
-          style={{ opacity: 0, transition: "opacity 80ms linear" }}
+          className="pointer-events-none absolute bottom-24 left-6 z-10 flex flex-col items-start gap-3 md:bottom-28 md:left-12 xl:left-16"
+          style={{ opacity: 0, transition: "opacity 80ms linear, transform 80ms linear" }}
         >
-          <span className="font-serif italic text-sm tracking-wide text-accent">
-            Final Phase &mdash; Complete
+          <span className="font-serif italic text-xs tracking-wide text-amber-300">
+            Next &mdash; The Handpicked Bouquet
           </span>
           <a
-            href="#systems"
-            className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-6 py-3 font-sans text-[12px] font-medium uppercase tracking-[0.22em] text-foreground backdrop-blur-md transition-all duration-300 hover:bg-white/[0.08] active:translate-y-[1px]"
+            href="#bouquet"
+            className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-5 py-2.5 font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-amber-200 backdrop-blur-md transition-all duration-300 hover:border-amber-300/50 hover:bg-amber-400/20 active:translate-y-[1px] shadow-[0_0_20px_-5px_rgba(251,191,36,0.3)]"
           >
-            System Report
-            <span aria-hidden>&darr;</span>
+            <span>The Bouquet</span>
+            <ArrowDown size={13} weight="bold" />
           </a>
         </div>
 
+        {/* Bottom Progress Bar */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10">
+          <div className="mx-6 mb-3 h-0.5 bg-white/10 md:mx-12">
+            <div
+              ref={progressFillRef}
+              className="h-full origin-left bg-gradient-to-r from-amber-400 to-amber-200"
+              style={{ transform: "scaleX(0)", transition: "transform 80ms linear" }}
+            />
+          </div>
+          <div className="mx-6 flex items-center justify-between pb-4 font-sans text-[10px] uppercase tracking-[0.28em] text-amber-200/60 md:mx-12">
+            <span>CHAPTER 03 &bull; PETALS & GRACE</span>
+            <span className="hidden sm:inline">AUTHENTIC &bull; PRACHII</span>
+            <span>Scroll &darr;</span>
+          </div>
+        </div>
+
+        {/* Loading overlay */}
         {!loaded && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-6 bg-background px-6">
-            <span className="font-serif italic text-accent text-lg">Reconstructing Growth...</span>
-            <div className="h-px w-60 bg-white/5 md:w-80">
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-6 bg-[#080706] px-6">
+            <div className="text-4xl animate-bounce">🌻</div>
+            <span className="font-serif italic text-amber-200 text-xl tracking-wide">
+              Unfolding The Golden Petals...
+            </span>
+            <div className="h-1 w-64 rounded-full bg-white/10 overflow-hidden md:w-80">
               <div
-                className="h-full bg-accent/60 transition-[width] duration-300 ease-out"
+                className="h-full bg-gradient-to-r from-amber-500 via-amber-300 to-amber-100 transition-[width] duration-300 ease-out"
                 style={{ width: `${Math.round(loadProgress * 100)}%` }}
               />
             </div>
-            <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-zinc-500">
-              {Math.round(loadProgress * 100)}%
+            <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-amber-300/70">
+              {Math.round(loadProgress * 100)}% &bull; Blooming Light
             </p>
           </div>
         )}
       </div>
+
+      <Prachi100Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </section>
   );
 }

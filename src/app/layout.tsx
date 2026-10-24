@@ -15,9 +15,9 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Princess Prachii — Protocol Alpha",
+  title: "Princess Prachii — The Sunflower Garden",
   description:
-    "System diagnostics complete. Princess Prachii standing by. Scroll to explore the journey.",
+    "A golden sanctuary dedicated to Princess Prachii. Gentle, fearless, and unstoppable. Scroll to explore her journey.",
   metadataBase: new URL("http://localhost:3000"),
 };
 
@@ -29,7 +29,7 @@ export default function RootLayout({
       lang="en"
       className={`${outfit.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="relative min-h-full bg-background text-foreground grain">
+      <body className="relative min-h-full bg-background text-foreground grain selection:bg-amber-400/30 selection:text-amber-100">
         <BackgroundMusic />
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
       </body>
