@@ -157,7 +157,7 @@ export function SystemsNominal() {
                 {/* ── Besties & Patchup Heartfelt Proposal ── */}
                 <div className="relative rounded-2xl border-l-[3px] border-amber-400/40 bg-gradient-to-r from-amber-400/[0.06] to-transparent pl-5 pr-4 py-5 sm:pl-7 sm:pr-6 sm:py-6 space-y-4">
                   <p className="text-amber-100/85 italic font-serif leading-[1.8] text-[14px] md:text-[15px]">
-                    &ldquo;Prachi wo saari misunderstandings ki wajah se hua tha... conversation gap ke chalte. If it doesn&apos;t hurt/suffocate you... can we forget the breakup and patchup like besties we were before? Future ko future pe chhordo, present moments enjoy karo. Agar tumko dikkat na ho to can we restore... but if it feels harsh harsh to rehne dooo 👉👈. Ye bas tumhara mood accha karne ke liye banaya tha, pressure nhi lena...&rdquo; Mujhe bs samajh hi nhi aa rha ki me kya karu... mn to kar rha h mana lu.... , lekin fir khyl aa rha ki kyaa ho wo manane se aur pareshaan ho jaayee. Yahi War Chal rhi h tabse. IDK Bohot confused huuu... manana bhi hai aur pareshan bhi nhi karna.... Kaash koi  rasta dikh jata yrrrr...
+                    &ldquo;Prachi wo saari misunderstandings ki wajah se hua tha... conversation gap ke chalte. If it doesn&apos;t hurt/suffocate you... can we forget the breakup and patchup like besties we were before? Future ko future pe chhordo, present moments enjoy karo. Agar tumko dikkat na ho to can we restore... but if it feels harsh harsh to rehne dooo 👉👈. Ye bas tumhara mood accha karne ke liye banaya tha, pressure nhi lena...&rdquo; Mujhe bs samajh hi nhi aa rha ki me kya karu... mn to kar rha h mana lu.... , lekin fir khyl aa rha ki kyaa ho wo manane se aur pareshaan ho jaayee. Texts drop karne ka bhi mn rehta h, lekin fir lagta h ki usne to distance banai to me aise karunga to ajeeb nhi lagega 👉👈 kahi texts se hi pareshan naa ho jaaye. Sometimes send karne ke 15 min baad unsend kar deta hu soch ke. Isiliye thoda bach sa rha hu bohot dinon se, initiate karne se... lekin fir wahi dar.. Yahi War Chal rhi h tabse. IDK Bohot confused huuu... manana bhi hai aur pareshan bhi nhi karna.... Kaash koi  rasta dikh jata yrrrr...
                   </p>
 
                   {/* Telegram Dilemma Note */}
@@ -264,7 +264,7 @@ export function SystemsNominal() {
           </AnimatedItem>
 
           <div className="divide-y divide-amber-400/[0.08]">
-            {deepakAttributes.map((row, i) => (
+            {deepakAttributes.map((row) => (
               <AnimatedItem key={row.label}>
                 <div className="group relative flex items-start justify-between gap-5 py-6 transition-all duration-300 hover:bg-amber-400/[0.02] rounded-xl px-2 sm:px-3">
                   {/* Hover glow indicator */}
